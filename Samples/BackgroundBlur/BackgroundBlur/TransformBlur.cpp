@@ -821,12 +821,9 @@ HRESULT TransformBlur::OnSetD3DManager(ULONG_PTR ulParam)
         return S_OK;
     }
 
-    IMFDXGIDeviceManager* p_IMFDXGIManager = NULL;
-    HANDLE p_deviceHandle;
-
-    // TODO: Change video and video device to fields
-    ID3D11VideoDevice* pDecoderService = NULL;
-    ID3D11Device* pd3dDevice = NULL;
+    ID3D11DeviceContext* pDeviceContext = NULL;
+    ID3D11VideoContext* pVideoContext = NULL;
+    ID3D10Multithread* pd3d10MultiThread = NULL;
 
     // Get the Device Manager sent from the  topology loader
     IUnknown* ptr = (IUnknown*) ulParam;
@@ -846,6 +843,11 @@ HRESULT TransformBlur::OnSetD3DManager(ULONG_PTR ulParam)
     
     // Get the d3d11 video device
     hr = m_pD3DDeviceManager->GetVideoService(p_deviceHandle, IID_ID3D11VideoDevice, (void**) &m_pD3DVideoDevice);
+
+    hr = m_pD3DDevice->GetImmediateContext(&pDeviceContext);
+    hr = pDeviceContext->QueryInterface(IID_PPV_ARGS(&pVideoContext), (void**) &pVideoContext);
+    m_pD3DDevice->QueryInterface(IID_PPV_ARGS(pd3d10MultiThread), (void**)&pd3d10MultiThread);
+    pd3d10MultiThread->SetMultiThreadProtect(true);
 
     if (FAILED(hr)) 
     {
